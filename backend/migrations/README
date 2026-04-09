@@ -1,0 +1,48 @@
+# Alembic Database Migrations
+
+This directory contains database migration scripts for DevMentor AI.
+
+## Quick Commands
+
+### Apply Migrations (Create Tables)
+```powershell
+alembic upgrade head
+```
+
+### Create New Migration
+```powershell
+alembic revision --autogenerate -m "Description of changes"
+```
+
+### Rollback Last Migration
+```powershell
+alembic downgrade -1
+```
+
+### Show Current Revision
+```powershell
+alembic current
+```
+
+### Show Migration History
+```powershell
+alembic history
+```
+
+## Notes
+
+- For **SQLite (local)**: Migrations work automatically
+- For **PostgreSQL (production)**: Set DATABASE_URL environment variable
+
+## Auto-Generated Tables
+
+The following tables are created:
+- users
+- projects
+- sessions
+- interactions
+- code_explanations
+- issues
+- quiz_sessions
+- quiz_questions
+- quiz_answers

@@ -1,0 +1,64 @@
+# Environment variables (NEVER commit .env)
+.env
+
+# Backend data
+backend/chroma_data/
+backend/*.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+backend/env/
+backend/.venv/
+
+# VS Code Extension
+vscode-extension/node_modules/
+vscode-extension/out/
+vscode-extension/dist/
+*.vsix
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uvicorn
+*.pid
+
+# SQLite files
+*.db
+*.sqlite
+*.sqlite3
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+.env3
+.venv/
+venv/
+ENV/
+
+# Temp files
+*.tmp
+*.temp
