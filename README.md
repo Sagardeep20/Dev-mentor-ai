@@ -10,7 +10,16 @@
 
 **AI-powered coding assistant with RAG for personalized code analysis**
 
-[Features](#features) • [Architecture](#architecture) • [Tech Stack](#tech-stack) • [Quick Start](#quick-start) • [Setup Guide](#setup-guide) • [API Docs](#api-documentation) • [Deployment](#deployment)
+[Features](#features) • [Architecture](#architecture) • [Tech Stack](#tech-stack) • [Quick Start](#quick-start) • [Setup Guide](#setup-guide) • [API Docs](#api-documentation) • [Deployment](#deployment) • [For Production Users](#-for-production-users)
+
+---
+
+## 🚀 Live Demo Backend
+
+<!-- UPDATE THIS URL AFTER DEPLOYMENT -->
+**Backend URL**: `https://devmentor-api-xxxx.onrender.com`
+
+> Replace `xxxx` with your actual Render deployment URL
 
 </div>
 
@@ -833,6 +842,53 @@ npm install
 cd ../backend
 pytest tests/ -v
 ```
+
+---
+
+---
+
+## ☁️ For Production Users
+
+### Download Extension
+
+1. Go to the **Releases** page of this GitHub repo
+2. Download `devmentor-ai-0.1.0.vsix`
+3. Install in VS Code:
+   ```powershell
+   code --install-extension devmentor-ai-0.1.0.vsix
+   ```
+
+### Configure Backend URL
+
+1. Open VS Code
+2. Go to **Settings** (Ctrl+,)
+3. Search for `DevMentor AI`
+4. Set **Backend URL** to your deployed backend URL
+   - Format: `https://devmentor-api-xxxx.onrender.com`
+
+### Register & Start Using
+
+1. Open a project folder in VS Code
+2. Click **DevMentor AI** in the sidebar
+3. Click **Register** tab
+4. Fill in:
+   - Username, Email, Password
+   - **Your Groq API Key** (get free at https://console.groq.com/keys)
+5. Click **Register**
+6. Click **Analyze Project**
+7. Start chatting!
+
+### How User Data Works
+
+| Data | Storage |
+|------|---------|
+| Your credentials | Encrypted in PostgreSQL |
+| Your Groq API key | Stored securely in your user record |
+| Your projects | Isolated by your user_id |
+| Your chat history | Isolated by your user_id |
+| Your vector data | Isolated by your user_id |
+
+**Every user has completely separate data and API access.**
 
 ---
 

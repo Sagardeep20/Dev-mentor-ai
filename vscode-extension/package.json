@@ -1,13 +1,23 @@
 {
   "name": "devmentor-ai",
   "displayName": "DevMentor AI",
-  "description": "AI-powered coding assistant with RAG for personalized guidance",
+  "description": "AI-powered coding assistant with RAG for personalized code analysis. Chat with your codebase, detect issues, and learn with quizzes.",
   "version": "0.1.0",
+  "publisher": "devmentor",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "AI"
+    "AI",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "ai",
+    "coding assistant",
+    "rag",
+    "code analysis",
+    "learning",
+    "mentor"
   ],
   "activationEvents": ["onView:devmentor-sidebar"],
   "main": "dist/extension.js",
@@ -80,7 +90,7 @@
         "devmentor.backendUrl": {
           "type": "string",
           "default": "http://localhost:8000",
-          "description": "DevMentor backend server URL"
+          "description": "DevMentor backend server URL (change this after deployment)"
         }
       }
     }
@@ -88,7 +98,9 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
