@@ -47,23 +47,34 @@ async def get_cached_explanation(db, project_id: str, code_hash: str) -> Optiona
     """Check if explanation is cached in database."""
     from sqlalchemy import select
     from models import CodeExplanation
+    import uuid
+
+    try:
+        project_uuid = uuid.UUID(project_id)
+    except ValueError:
+        return None
 
     result = await db.execute(
         select(CodeExplanation).where(
-            CodeExplanation.project_id == project_id,
+            CodeExplanation.project_id == project_uuid,
             CodeExplanation.code_hash == code_hash
         )
     )
     cached = result.scalar_one_or_none()
     return cached.explanation if cached else None
 
-
 async def cache_explanation(db, project_id: str, file_path: str, code_hash: str, explanation: str, language: str):
     """Store explanation in cache."""
     from models import CodeExplanation
+    import uuid
+
+    try:
+        project_uuid = uuid.UUID(project_id)
+    except ValueError:
+        return
 
     cached = CodeExplanation(
-        project_id=project_id,
+        project_id=project_uuid,
         file_path=file_path,
         code_hash=code_hash,
         explanation=explanation,

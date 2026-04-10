@@ -92,7 +92,7 @@ export class ApiClient {
         }
     }
 
-    async ask(query: string, projectPath: string): Promise<{ answer: string; sources: QueryResponse['sources'] }> {
+    async ask(query: string, projectPath: string): Promise<{ answer: string; sources: QueryResponse['sources'], error?: string }> {
         try {
             const response = await fetch(`${this.baseUrl}/query`, {
                 method: 'POST',
@@ -100,6 +100,9 @@ export class ApiClient {
                 body: JSON.stringify({ query, project_path: projectPath })
             });
 
+            if (response.status === 401 || response.status === 422) {
+                return { answer: '', sources: [], error: 'Authentication failed. Please login again.' };
+            }
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json() as QueryResponse;
             return { answer: data.answer || 'No response', sources: data.sources || [] };
@@ -117,7 +120,7 @@ export class ApiClient {
                 body: JSON.stringify({ project_path: projectPath })
             });
 
-            if (response.status === 401) {
+            if (response.status === 401 || response.status === 422) {
                 return { status: 'error', files_found: 0, chunks_created: 0, error: 'Authentication failed. Please login again.' };
             }
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -169,6 +172,9 @@ export class ApiClient {
                 body: JSON.stringify({ project_path: projectPath, scan_type: scanType })
             });
 
+            if (response.status === 401 || response.status === 422) {
+                throw new Error('Authentication failed. Please login again.');
+            }
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return await response.json() as AnalyzeIssuesResponse;
         } catch (error) {
@@ -281,6 +287,9 @@ export class ApiClient {
         try {
             const url = projectPath ? `${this.baseUrl}/history?project_path=${encodeURIComponent(projectPath)}` : `${this.baseUrl}/history`;
             const response = await fetch(url, { headers: this.headers() });
+            if (response.status === 401 || response.status === 422) {
+                throw new Error('Authentication failed. Please login again.');
+            }
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json() as HistoryResponse;
             return data.history;

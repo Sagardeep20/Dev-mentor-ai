@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { ApiClient } from './api-client';
 
 let apiClient: ApiClient | null = null;
+let activated = false;
 
 function getBackendUrl(): string {
 	const config = vscode.workspace.getConfiguration('devmentor');
@@ -27,6 +28,13 @@ function initApiClient(baseUrl: string, apiKey: string): ApiClient {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+	if (activated) {
+		console.log('DevMentor already activated, skipping');
+		return;
+	}
+	activated = true;
+	console.log('DevMentor activating...');
+	
 	const provider = new DevMentorViewProvider(context);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider('devmentor.main', provider)
@@ -206,9 +214,11 @@ class DevMentorViewProvider implements vscode.WebviewViewProvider {
 
 				if (message.type === 'checkAuth') {
 					const key = await getApiKey(this.context);
+					console.log('DevMentor checkAuth: key=', key ? 'present' : 'missing');
 					if (key) {
 						const client = new ApiClient({ baseUrl, apiKey: key });
 						const isValid = await client.checkApiKey();
+						console.log('DevMentor checkAuth: isValid=', isValid);
 						if (isValid) {
 							initApiClient(baseUrl, key);
 							webviewView.webview.postMessage({ type: 'authSuccess' });
@@ -220,11 +230,15 @@ class DevMentorViewProvider implements vscode.WebviewViewProvider {
 						webviewView.webview.postMessage({ type: 'showAuth' });
 					}
 				} else if (message.type === 'checkBackend') {
+					console.log('DevMentor checkBackend: url=', baseUrl);
 					const connected = await this.checkBackend(baseUrl);
+					console.log('DevMentor checkBackend: connected=', connected);
 					webviewView.webview.postMessage({ type: 'backendStatus', status: { connected } });
 				} else if (message.type === 'login') {
+					console.log('DevMentor login: email=', message.email);
 					const client = new ApiClient({ baseUrl, apiKey: '' });
 					const result = await client.login(message.email, message.password);
+					console.log('DevMentor login: result=', result);
 					if (result.error) {
 						webviewView.webview.postMessage({ type: 'authError', text: result.error });
 					} else {
@@ -250,11 +264,15 @@ class DevMentorViewProvider implements vscode.WebviewViewProvider {
 						return;
 					}
 					const result = await client.ask(message.text || '', workspacePath || '');
-					webviewView.webview.postMessage({
-						type: 'response',
-						text: result.answer,
-						sources: result.sources
-					});
+					if (result.error) {
+						webviewView.webview.postMessage({ type: 'error', text: result.error });
+					} else {
+						webviewView.webview.postMessage({
+							type: 'response',
+							text: result.answer,
+							sources: result.sources
+						});
+					}
 				} else if (message.type === 'analyze') {
 					const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 					if (!workspacePath) {
@@ -262,13 +280,23 @@ class DevMentorViewProvider implements vscode.WebviewViewProvider {
 						return;
 					}
 					const client = await this.getClient();
-					if (!client) return;
+					if (!client) {
+						webviewView.webview.postMessage({ type: 'error', text: 'Not authenticated. Please login first.' });
+						return;
+					}
 					const result = await client.analyze(workspacePath);
-					webviewView.webview.postMessage({ type: 'response', text: `Analysis complete: ${result.files_found} files, ${result.chunks_created} chunks.` });
+					if (result.error) {
+						webviewView.webview.postMessage({ type: 'error', text: result.error });
+					} else {
+						webviewView.webview.postMessage({ type: 'response', text: `Analysis complete: ${result.files_found} files, ${result.chunks_created} chunks.` });
+					}
 				} else if (message.type === 'getHistory') {
 					const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 					const client = await this.getClient();
-					if (!client) return;
+					if (!client) {
+						webviewView.webview.postMessage({ type: 'error', text: 'Not authenticated. Please login first.' });
+						return;
+					}
 					const history = await client.getHistory(workspacePath);
 					webviewView.webview.postMessage({ type: 'history', history });
 				} else if (message.type === 'clear') {
@@ -300,9 +328,16 @@ class DevMentorViewProvider implements vscode.WebviewViewProvider {
 						return;
 					}
 					const client = await this.getClient();
-					if (!client) return;
-					const result = await client.analyzeIssues(workspacePath);
-					webviewView.webview.postMessage({ type: 'issuesResult', totalIssues: result.total_issues, issuesBySeverity: result.issues_by_severity });
+					if (!client) {
+						webviewView.webview.postMessage({ type: 'error', text: 'Not authenticated. Please login first.' });
+						return;
+					}
+					try {
+						const result = await client.analyzeIssues(workspacePath);
+						webviewView.webview.postMessage({ type: 'issuesResult', totalIssues: result.total_issues, issuesBySeverity: result.issues_by_severity });
+					} catch (e: any) {
+						webviewView.webview.postMessage({ type: 'error', text: e.message });
+					}
 				} else if (message.type === 'generatePlan') {
 					const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 					if (!workspacePath) {
