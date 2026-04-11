@@ -19,7 +19,7 @@ if not GROQ_API_KEY and not IS_PRODUCTION:
     print("WARNING: GROQ_API_KEY not set. Some features may not work.")
 
 # Paths
-CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_data")
+CHROMA_DIR = os.getenv("CHROMA_DIR", "/tmp/chroma_data" if IS_PRODUCTION else "./chroma_data")
 DEFAULT_PROJECT_PATH = Path(__file__).parent.parent
 
 # Models
