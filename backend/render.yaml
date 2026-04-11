@@ -27,7 +27,7 @@ services:
       - key: CHAT_MODEL
         value: llama-3.3-70b-versatile
       - key: CHROMA_DIR
-        value: /var/data/chroma_data
+        value: /tmp/chroma_data
       - key: RATE_LIMIT_PER_MINUTE
         value: "60"
       - key: NODE_ENV
